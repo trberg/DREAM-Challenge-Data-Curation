@@ -44,6 +44,7 @@ class MortalityPrediction:
     def __repr__(self):
         return "MortalityPrediction()"
 
+
     def __str__(self):
         return f"""
 Mortality Prediction Object
@@ -61,6 +62,7 @@ True negative:\t{self.trueNegatives}
         max_death = datetime.strptime(max_death, "%Y-%m-%d")
         return max_death
 
+
     def get_window_begin(self, months):
         window_begin = self.cutoff - dateutil.relativedelta.relativedelta(months=months)
         return window_begin
@@ -69,6 +71,7 @@ True negative:\t{self.trueNegatives}
     def get_cutoff_date(self):
         cutoff = self.endOfData - dateutil.relativedelta.relativedelta(months=self.months_cutoff)
         return cutoff
+
 
     def TP_TN_distinction(self):
         if os.path.exists(self.truePositives) and os.path.exists(self.trueNegatives):
@@ -90,6 +93,7 @@ True negative:\t{self.trueNegatives}
             TN = TN[~TN["difference"]][["person_id"]]
             TN.drop_duplicates(inplace=True)
             TN.to_csv(self.trueNegatives, index=False)
+
 
     def split_data_to_training_evaluation(self, ratio):
 
@@ -118,33 +122,33 @@ True negative:\t{self.trueNegatives}
             i += 1
         return training, evaluation
         
+
     def split_tables(self, train, evaluation):
         
         for tab in self.required_tables:
-            if tab == "person.csv":
-                pass
+            print (f"splitting {tab}")
+            data = pd.read_csv(f"{self.dataFolder}/{tab}")
+
+            train_data = data.merge(train, on="person_id", how="inner")
+            train_data.to_csv(f"{self.train}/{tab}")
+            train_data = None
+
+            if tab != "deathnot.csv":
+                eval_data = data.merge(evaluation, on="person_id", how="inner")
+                eval_data.to_csv(f"{self.eval}/{tab}")
+                eval_data = None
             else:
-                print (f"spliting {tab}")
-                data = pd.read_csv(f"{self.dataFolder}/{tab}")
+                eval_data = None
 
-                train_data = data.merge(train, on="person_id", how="right")
-                train_data.to_csv(f"{self.train}/{tab}")
-                train_data = None
-
-                if tab != "death.csv":
-                    eval_data = data.merge(evaluation, on="person_id", how="right")
-                    eval_data.to_csv(f"{self.eval}/{tab}")
-                    eval_data = None
 
     def create_goldstandard(self):
         TP = pd.read_csv(self.truePositives)
         TP["status"] = 1
-        evals = pd.read_csv(self.eval)
+        evals = pd.read_csv(f"{self.eval}person.csv")
 
-        goldstandard = evals.merge(TP, on="person_id", how="left")[["person_id"]]
+        goldstandard = evals.merge(TP, on="person_id", how="inner")[["person_id", "status"]]
         goldstandard.fillna(0, inplace=True)
-        goldstandard.to_csv(self.data)
-        print (goldstandard)
+        goldstandard.to_csv(f"{self.data}goldstandard.csv")
 
 
     def check_tables(self, path):
@@ -156,9 +160,10 @@ True negative:\t{self.trueNegatives}
             missing_tables = [tab for tab in (req_tables-files)]
             return False, missing_tables
 
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("-f", "--datafolder", required=True, help="Folder path to the full OMOP dataset")
+    parser.add_argument("-f", "--datafolder", required=True, help="Path to the folder containing the full OMOP dataset")
     parser.add_argument("-r", "--evalRatio", default=20, help="Percentage of the evaluation dataset to the full dataset")
     args = parser.parse_args()
 
@@ -170,7 +175,7 @@ if __name__ == "__main__":
     if status:
         
         # categorize patients as True Positive and True Negative 
-        mp.TP_TN_distinction()
+        #mp.TP_TN_distinction()
 
         #generate training and evaluation patients
         training, evaluation = mp.split_data_to_training_evaluation(ratio=args.evalRatio)
