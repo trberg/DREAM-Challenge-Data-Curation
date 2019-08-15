@@ -100,15 +100,15 @@ True negative:\t{self.trueNegatives}
         visits = pd.read_csv(f"{self.dataFolder}/visit_occurrence.csv", usecols=["person_id", "visit_start_date"])
         print ("visits loaded")
         visits["visit_start_date"] = pd.to_datetime(visits["visit_start_date"])
-        visits["cutoff"] = self.cutoff
 
         i = 1
         eval_ratio = 0
         while (eval_ratio) < ratio:
             print ("splitting", i)
-            visits["window_begin"] = self.get_window_begin(months=i)
+            #visits["window_begin"] = self.get_window_begin(months=i)
+            window_begin = self.get_window_begin(months=i)
             print ("applying cutoff calculation")
-            visits["evaluation"] = visits.apply(lambda x: (x["visit_start_date"] > x["window_begin"]) & (x["visit_start_date"] <= x["cutoff"]), axis=1)
+            visits["evaluation"] = visits.apply(lambda x: (x["visit_start_date"] > window_begin) & (x["visit_start_date"] <= self.cutoff))
             
             #print (visits.head())
             print ("total patients calc")
@@ -119,9 +119,9 @@ True negative:\t{self.trueNegatives}
 
             training = visits[~visits["person_id"].isin(evaluation["person_id"])][["person_id"]].drop_duplicates()
 
-            #print ("Pred window size:", i)
+            print ("Pred window size:", i)
             #print (round((float(len(training))/total_patients)*100, 3))
-            #print (eval_ratio)
+            print (eval_ratio)
             i += 1
         return training, evaluation
         
