@@ -119,7 +119,7 @@ True negative:\t{self.trueNegatives}
                 window_begin = self.get_window_begin(months=0, weeks=week)
             else:
                 window_begin = self.get_window_begin(months=i)
-
+            print (f"Window Begin: {window_begin}")
             print ("applying cutoff calculation")
             evaluation = visits[(visits["visit_start_date"] > window_begin) & (visits["visit_start_date"] <= self.cutoff)][["person_id"]].drop_duplicates()
 
