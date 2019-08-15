@@ -58,8 +58,8 @@ True negative:\t{self.trueNegatives}
     
     def get_end_of_data(self, path):
         death = pd.read_csv(f"{path}/death.csv")
+        death["death_date"] = pd.to_datetime(death["death_date"])
         max_death = max(death["death_date"])
-        max_death = datetime.strptime(max_death, "%Y-%m-%d")
         return max_death
 
 
@@ -125,9 +125,42 @@ True negative:\t{self.trueNegatives}
 
     def split_tables(self, train, evaluation):
         
+        dates = {
+            "condition_occurrence.csv": "condition_start_date", 
+            "drug_exposure.csv": "drug_exposure_start_date",
+            "measurement.csv": "measurement_date",
+            "observation.csv":"observation_date",
+            "observation_period.csv": "observation_period_start_date", 
+            "procedure_occurrence.csv": "procedure_date", 
+            "visit_occurrence.csv": "visit_start_date"
+        }
+
         for tab in self.required_tables:
+
             print (f"splitting {tab}")
             data = pd.read_csv(f"{self.dataFolder}/{tab}")
+
+            if tab not in ["death.csv", "person.csv"]:
+                data[dates[tab]] = pd.to_datetime(data[dates[tab]])
+                filtering = data.copy()
+                TN = pd.read_csv(self.trueNegatives)
+                TN["TN"] = True
+
+                print ("Pre filter:", len(data))
+                filtering = filtering[filtering[dates[tab]] <= self.endOfData]
+
+                filtering["cutoff"] = self.cutoff
+
+                filtering = filtering.merge(TN, on="person_id", how="left")
+                filtering.fillna(False, inplace=True)
+                #print (filtering)
+                filtering = filtering[(filtering["TN"]) & (filtering[dates[tab]] <= filtering["cutoff"])][[f"{tab.split('.')[0]}_id"]]
+
+                data = data.merge(filtering, on=f"{tab.split('.')[0]}_id", how="inner")
+                print ("Post filter:", len(data))
+                
+            else:
+                pass
 
             train_data = data.merge(train, on="person_id", how="inner")
             train_data.to_csv(f"{self.train}/{tab}")
@@ -146,9 +179,27 @@ True negative:\t{self.trueNegatives}
         TP["status"] = 1
         evals = pd.read_csv(f"{self.eval}person.csv")
 
-        goldstandard = evals.merge(TP, on="person_id", how="inner")[["person_id", "status"]]
+        goldstandard = evals.merge(TP, on="person_id", how="left")[["person_id", "status"]]
         goldstandard.fillna(0, inplace=True)
         goldstandard.to_csv(f"{self.data}goldstandard.csv")
+
+
+    def prune_visits(self):
+
+        visits = pd.read_csv(f"{self.dataFolder}/visit_occurrence.csv", usecols=["visit_occurrence_id", "person_id", "visit_start_date"])
+        visits["visit_start_date"] = pd.to_datetime(visits["visit_start_date"])
+        visits = visits[visits["visit_start_date"] <= self.endOfData]
+
+        visits["cutoff"] = self.cutoff
+
+        TN = pd.read_csv(self.trueNegatives)
+        TN["TN"] = True
+        visits = visits.merge(TN, on="person_id", how="left")
+        visits.fillna(False, inplace=True)
+        
+        visits = visits[(visits["TN"]) & (visits["visit_start_date"] <= visits["cutoff"])][["visit_occurrence_id"]]
+        
+        return visits
 
 
     def check_tables(self, path):
@@ -175,7 +226,7 @@ if __name__ == "__main__":
     if status:
         
         # categorize patients as True Positive and True Negative 
-        #mp.TP_TN_distinction()
+        mp.TP_TN_distinction()
 
         #generate training and evaluation patients
         training, evaluation = mp.split_data_to_training_evaluation(ratio=args.evalRatio)
