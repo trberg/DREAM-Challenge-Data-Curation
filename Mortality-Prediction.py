@@ -13,7 +13,7 @@ class MortalityPrediction:
         self.endOfData = self.get_end_of_data(dataFolder)
         self.cutoff = self.get_cutoff_date()
         
-        self.data = f"data/{project}/"
+        self.data = f"/output/{project}/"
         if not os.path.exists(self.data):
             os.mkdir(self.data)
         
