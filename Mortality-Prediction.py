@@ -108,7 +108,7 @@ True negative:\t{self.trueNegatives}
             #visits["window_begin"] = self.get_window_begin(months=i)
             window_begin = self.get_window_begin(months=i)
             print ("applying cutoff calculation")
-            visits["evaluation"] = visits.apply(lambda x: (x["visit_start_date"] > window_begin) & (x["visit_start_date"] <= self.cutoff))
+            #visits["evaluation"] = visits.apply(lambda x: (x["visit_start_date"] > window_begin) & (x["visit_start_date"] <= self.cutoff))
 
             evaluation = visits[(visits["visit_start_date"] > window_begin) & (visits["visit_start_date"] <= self.cutoff)][["person_id"]].drop_duplicates()
             
