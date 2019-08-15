@@ -5,7 +5,7 @@ import dateutil.relativedelta
 import os
 
 class MortalityPrediction:
-    def __init__(self, dataFolder):
+    def __init__(self, dataFolder, project):
         self.dataFolder = dataFolder
         self.months_cutoff = 6
         self.predictionWindow = 6
@@ -13,7 +13,7 @@ class MortalityPrediction:
         self.endOfData = self.get_end_of_data(dataFolder)
         self.cutoff = self.get_cutoff_date()
         
-        self.data = "data/"
+        self.data = f"data/{project}/"
         if not os.path.exists(self.data):
             os.mkdir(self.data)
         
@@ -25,8 +25,8 @@ class MortalityPrediction:
         if not os.path.exists(self.eval):
             os.mkdir(self.eval)
 
-        self.truePositives = "data/TP.csv"
-        self.trueNegatives = "data/TN.csv"
+        self.truePositives = f"{self.data}TP.csv"
+        self.trueNegatives = f"{self.data}TN.csv"
 
         self.required_tables = [
             "condition_occurrence.csv", 
@@ -216,9 +216,10 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("-f", "--datafolder", required=True, help="Path to the folder containing the full OMOP dataset")
     parser.add_argument("-r", "--evalRatio", default=20, help="Percentage of the evaluation dataset to the full dataset")
+    parser.add_argument("-p", "--project", required=True, help="Name of the project to store the output")
     args = parser.parse_args()
 
-    mp = MortalityPrediction(args.datafolder)
+    mp = MortalityPrediction(args.datafolder, args.project)
 
     # checks to make sure that all necessary tables are available in the data folder
     status, tables = mp.check_tables(args.datafolder)
