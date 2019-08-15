@@ -63,8 +63,11 @@ True negative:\t{self.trueNegatives}
         return max_death
 
 
-    def get_window_begin(self, months):
-        window_begin = self.cutoff - dateutil.relativedelta.relativedelta(months=months)
+    def get_window_begin(self, months, weeks=0):
+        if weeks > 0:
+            window_begin = self.cutoff + dateutil.relativedelta.relativedelta(weeks=weeks)
+        else:
+            window_begin = self.cutoff - dateutil.relativedelta.relativedelta(months=months)
         return window_begin
 
 
@@ -101,30 +104,39 @@ True negative:\t{self.trueNegatives}
         print ("visits loaded")
         visits["visit_start_date"] = pd.to_datetime(visits["visit_start_date"])
 
+        print ("total patients calc")
+        total_patients = float(len((visits[["person_id"]]).drop_duplicates()))
+
         i = 1
-        eval_ratio = 100
-        while (eval_ratio) > ratio:
-            print ("splitting", i)
-            #visits["window_begin"] = self.get_window_begin(months=i)
-            window_begin = self.get_window_begin(months=i)
+        week = 0
+        eval_ratio = 0
+        while (eval_ratio) < ratio:
+            print ("=========================")
+            print ("Splitting", i)
+
+            if week > 0 or eval_ratio == -1:
+                week += 1
+                window_begin = self.get_window_begin(months=0, weeks=week)
+            else:
+                window_begin = self.get_window_begin(months=i)
+
             print ("applying cutoff calculation")
-            #visits["evaluation"] = visits.apply(lambda x: (x["visit_start_date"] > window_begin) & (x["visit_start_date"] <= self.cutoff))
-
             evaluation = visits[(visits["visit_start_date"] > window_begin) & (visits["visit_start_date"] <= self.cutoff)][["person_id"]].drop_duplicates()
-            
-            #print (visits.head())
-            print ("total patients calc")
-            total_patients = float(len((visits[["person_id"]]).drop_duplicates()))
 
-            #evaluation = visits[visits["evaluation"]][["person_id"]].drop_duplicates()
+            print ("calc eval ratio")
             eval_ratio = round((float(len(evaluation))/total_patients)*100, 3)
 
+            print ("gathering training")
             training = visits[~visits["person_id"].isin(evaluation["person_id"])][["person_id"]].drop_duplicates()
 
             print ("Pred window size:", i)
             #print (round((float(len(training))/total_patients)*100, 3))
             print (f"Evaluation: {eval_ratio}%")
-            i += 1
+
+            if (eval_ratio-ratio) > 10:
+                eval_ratio = -10
+            else:
+                i += 1
         return training, evaluation
         
 
