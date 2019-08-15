@@ -109,19 +109,21 @@ True negative:\t{self.trueNegatives}
             window_begin = self.get_window_begin(months=i)
             print ("applying cutoff calculation")
             visits["evaluation"] = visits.apply(lambda x: (x["visit_start_date"] > window_begin) & (x["visit_start_date"] <= self.cutoff))
+
+            evaluation = visits[(visits["visit_start_date"] > window_begin) & (visits["visit_start_date"] <= self.cutoff)][["person_id"]].drop_duplicates()
             
             #print (visits.head())
             print ("total patients calc")
             total_patients = float(len((visits[["person_id"]]).drop_duplicates()))
 
-            evaluation = visits[visits["evaluation"]][["person_id"]].drop_duplicates()
+            #evaluation = visits[visits["evaluation"]][["person_id"]].drop_duplicates()
             eval_ratio = round((float(len(evaluation))/total_patients)*100, 3)
 
             training = visits[~visits["person_id"].isin(evaluation["person_id"])][["person_id"]].drop_duplicates()
 
             print ("Pred window size:", i)
             #print (round((float(len(training))/total_patients)*100, 3))
-            print (eval_ratio)
+            print (f"Evaluation: {eval_ratio}%")
             i += 1
         return training, evaluation
         
