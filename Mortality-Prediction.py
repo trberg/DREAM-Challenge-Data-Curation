@@ -105,12 +105,13 @@ True negative:\t{self.trueNegatives}
         i = 1
         eval_ratio = 0
         while (eval_ratio) < ratio:
-            print ("spliting", i)
+            print ("splitting", i)
             visits["window_begin"] = self.get_window_begin(months=i)
+            print ("applying cutoff calculation")
             visits["evaluation"] = visits.apply(lambda x: (x["visit_start_date"] > x["window_begin"]) & (x["visit_start_date"] <= x["cutoff"]), axis=1)
             
             #print (visits.head())
-
+            print ("total patients calc")
             total_patients = float(len((visits[["person_id"]]).drop_duplicates()))
 
             evaluation = visits[visits["evaluation"]][["person_id"]].drop_duplicates()
