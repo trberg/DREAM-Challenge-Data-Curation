@@ -13,7 +13,7 @@ class MortalityPrediction:
         self.endOfData = self.get_end_of_data(dataFolder)
         self.cutoff = self.get_cutoff_date()
         
-        self.data = f"/output/{project}/"
+        self.data = f"data/{project}/"
         if not os.path.exists(self.data):
             os.mkdir(self.data)
         
@@ -65,7 +65,7 @@ True negative:\t{self.trueNegatives}
 
     def get_window_begin(self, months, weeks=0):
         if weeks > 0:
-            window_begin = self.cutoff + dateutil.relativedelta.relativedelta(weeks=weeks)
+            window_begin = self.cutoff - dateutil.relativedelta.relativedelta(weeks=weeks)
         else:
             window_begin = self.cutoff - dateutil.relativedelta.relativedelta(months=months)
         return window_begin
@@ -107,7 +107,7 @@ True negative:\t{self.trueNegatives}
         print ("total patients calc")
         total_patients = float(len((visits[["person_id"]]).drop_duplicates()))
 
-        i = 1
+        i = 0
         week = 0
         eval_ratio = 0
         while (eval_ratio) < ratio:
@@ -135,6 +135,8 @@ True negative:\t{self.trueNegatives}
 
             if (eval_ratio-ratio) > 10:
                 eval_ratio = -1
+            elif eval_ratio == 0.0 and week > 4:
+                break
             else:
                 i += 1
         return training, evaluation
@@ -237,6 +239,7 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     mp = MortalityPrediction(args.datafolder, args.project)
+    print (mp)
 
     # checks to make sure that all necessary tables are available in the data folder
     status, tables = mp.check_tables(args.datafolder)
