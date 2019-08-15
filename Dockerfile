@@ -10,3 +10,5 @@ WORKDIR /app
 
 # Copy our python program for training and inference
 COPY ./Mortality-Prediction.py .
+
+CMD ["python", "Mortality-Prediction.py", "-f", "/data", "-p" "full_synpuf"]
