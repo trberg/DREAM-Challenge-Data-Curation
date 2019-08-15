@@ -98,12 +98,14 @@ True negative:\t{self.trueNegatives}
     def split_data_to_training_evaluation(self, ratio):
 
         visits = pd.read_csv(f"{self.dataFolder}/visit_occurrence.csv", usecols=["person_id", "visit_start_date"])
+        print ("visits loaded")
         visits["visit_start_date"] = pd.to_datetime(visits["visit_start_date"])
         visits["cutoff"] = self.cutoff
 
         i = 1
         eval_ratio = 0
         while (eval_ratio) < ratio:
+            print ("spliting", i)
             visits["window_begin"] = self.get_window_begin(months=i)
             visits["evaluation"] = visits.apply(lambda x: (x["visit_start_date"] > x["window_begin"]) & (x["visit_start_date"] <= x["cutoff"]), axis=1)
             
