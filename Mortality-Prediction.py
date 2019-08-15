@@ -134,7 +134,7 @@ True negative:\t{self.trueNegatives}
             print (f"Evaluation: {eval_ratio}%")
 
             if (eval_ratio-ratio) > 10:
-                eval_ratio = -10
+                eval_ratio = -1
             else:
                 i += 1
         return training, evaluation
