@@ -102,8 +102,8 @@ True negative:\t{self.trueNegatives}
         visits["visit_start_date"] = pd.to_datetime(visits["visit_start_date"])
 
         i = 1
-        eval_ratio = 0
-        while (eval_ratio) < ratio:
+        eval_ratio = 100
+        while (eval_ratio) > ratio:
             print ("splitting", i)
             #visits["window_begin"] = self.get_window_begin(months=i)
             window_begin = self.get_window_begin(months=i)
@@ -233,6 +233,7 @@ if __name__ == "__main__":
         
         # categorize patients as True Positive and True Negative 
         mp.TP_TN_distinction()
+        print ("True Positive and True Negatives found")
 
         #generate training and evaluation patients
         training, evaluation = mp.split_data_to_training_evaluation(ratio=args.evalRatio)
