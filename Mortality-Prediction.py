@@ -101,37 +101,37 @@ True negative:\t{self.trueNegatives}
     def split_data_to_training_evaluation(self, ratio):
 
         visits = pd.read_csv(f"{self.dataFolder}/visit_occurrence.csv", usecols=["person_id", "visit_start_date"])
-        print ("visits loaded")
+        print ("visits loaded", flush=True)
         visits["visit_start_date"] = pd.to_datetime(visits["visit_start_date"])
 
-        print ("total patients calc")
+        print ("total patients calc", flush=True)
         total_patients = float(len((visits[["person_id"]]).drop_duplicates()))
 
         i = 0
         week = 0
         eval_ratio = 0
         while (eval_ratio) < ratio:
-            print ("=========================")
-            print ("Splitting", i)
+            print ("=========================", flush=True)
+            print ("Splitting", i, flush=True)
 
             if week > 0 or eval_ratio == -1:
                 week += 1
                 window_begin = self.get_window_begin(months=0, weeks=week)
             else:
                 window_begin = self.get_window_begin(months=i)
-            print (f"Window Begin: {window_begin}")
-            print ("applying cutoff calculation")
+            print (f"Window Begin: {window_begin}", flush=True)
+            print ("applying cutoff calculation", flush=True)
             evaluation = visits[(visits["visit_start_date"] > window_begin) & (visits["visit_start_date"] <= self.cutoff)][["person_id"]].drop_duplicates()
 
-            print ("calc eval ratio")
+            print ("calc eval ratio", flush=True)
             eval_ratio = round((float(len(evaluation))/total_patients)*100, 3)
 
-            print ("gathering training")
+            print ("gathering training", flush=True)
             training = visits[~visits["person_id"].isin(evaluation["person_id"])][["person_id"]].drop_duplicates()
 
-            print ("Pred window size:", i)
+            print ("Pred window size:", i, flush=True)
             #print (round((float(len(training))/total_patients)*100, 3))
-            print (f"Evaluation: {eval_ratio}%")
+            print (f"Evaluation: {eval_ratio}%", flush=True)
 
             if (eval_ratio-ratio) > 10:
                 eval_ratio = -1
@@ -156,7 +156,7 @@ True negative:\t{self.trueNegatives}
 
         for tab in self.required_tables:
 
-            print (f"splitting {tab}")
+            print (f"splitting {tab}", flush=True)
             data = pd.read_csv(f"{self.dataFolder}/{tab}")
 
             if tab not in ["death.csv", "person.csv"]:
@@ -165,7 +165,7 @@ True negative:\t{self.trueNegatives}
                 TN = pd.read_csv(self.trueNegatives)
                 TN["TN"] = True
 
-                print ("Pre filter:", len(data))
+                print ("Pre filter:", len(data), flush=True)
                 filtering = filtering[filtering[dates[tab]] <= self.endOfData]
 
                 filtering["cutoff"] = self.cutoff
@@ -176,7 +176,7 @@ True negative:\t{self.trueNegatives}
                 filtering = filtering[(filtering["TN"]) & (filtering[dates[tab]] <= filtering["cutoff"])][[f"{tab.split('.')[0]}_id"]]
 
                 data = data.merge(filtering, on=f"{tab.split('.')[0]}_id", how="inner")
-                print ("Post filter:", len(data))
+                print ("Post filter:", len(data), flush=True)
                 
             else:
                 pass
@@ -239,7 +239,7 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     mp = MortalityPrediction(args.datafolder, args.project)
-    print (mp)
+    print (mp, flush=True)
 
     # checks to make sure that all necessary tables are available in the data folder
     status, tables = mp.check_tables(args.datafolder)
@@ -248,7 +248,7 @@ if __name__ == "__main__":
         
         # categorize patients as True Positive and True Negative 
         mp.TP_TN_distinction()
-        print ("True Positive and True Negatives found")
+        print ("True Positive and True Negatives found", flush=True)
 
         #generate training and evaluation patients
         training, evaluation = mp.split_data_to_training_evaluation(ratio=args.evalRatio)
@@ -260,6 +260,6 @@ if __name__ == "__main__":
         mp.create_goldstandard()
 
     else:
-        print ("Tables are missing:")
+        print ("Tables are missing:", flush=True)
         for tab in tables:
-            print (f"\t{tab}")
+            print (f"\t{tab}", flush=True)
