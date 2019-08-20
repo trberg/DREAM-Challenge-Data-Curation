@@ -168,12 +168,11 @@ True negative:\t{self.trueNegatives}
                 print ("Pre filter:", len(data), flush=True)
                 filtering = filtering[filtering[dates[tab]] <= self.endOfData]
 
-                filtering["cutoff"] = self.cutoff
-
                 filtering = filtering.merge(TN, on="person_id", how="left")
                 filtering.fillna(False, inplace=True)
-                #print (filtering)
-                filtering = filtering[(filtering["TN"]) & (filtering[dates[tab]] <= filtering["cutoff"])][[f"{tab.split('.')[0]}_id"]]
+                
+                print (filtering, flush=True)
+                filtering = filtering[(filtering["TN"]) & (filtering[dates[tab]] <= self.cutoff)][[f"{tab.split('.')[0]}_id"]]
 
                 data = data.merge(filtering, on=f"{tab.split('.')[0]}_id", how="inner")
                 print ("Post filter:", len(data), flush=True)
@@ -184,6 +183,7 @@ True negative:\t{self.trueNegatives}
             train_data = data.merge(train, on="person_id", how="inner")
             train_data.to_csv(f"{self.train}/{tab}")
             train_data = None
+            print (f"train data for {tab} done")
 
             if tab != "death.csv":
                 eval_data = data.merge(evaluation, on="person_id", how="inner")
@@ -191,6 +191,7 @@ True negative:\t{self.trueNegatives}
                 eval_data = None
             else:
                 eval_data = None
+            print (f"finished {tab}", flush=True)
 
 
     def create_goldstandard(self):
@@ -252,9 +253,11 @@ if __name__ == "__main__":
 
         #generate training and evaluation patients
         training, evaluation = mp.split_data_to_training_evaluation(ratio=args.evalRatio)
+        print ("training and evaluation done", flush=True)
 
         # split all tables in the required table list in training and evaluation using the generated patient lists
         mp.split_tables(training, evaluation)
+        print ("table split", flush=True)
 
         # build the goldstandard evaluation benchmark
         mp.create_goldstandard()
