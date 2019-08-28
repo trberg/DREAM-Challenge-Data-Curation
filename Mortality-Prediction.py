@@ -181,13 +181,13 @@ True negative:\t{self.trueNegatives}
                 pass
 
             train_data = data.merge(train, on="person_id", how="inner")
-            train_data.to_csv(f"{self.train}/{tab}")
+            train_data.to_csv(f"{self.train}/{tab}", index=False)
             train_data = None
             print (f"train data for {tab} done")
 
             if tab != "death.csv":
                 eval_data = data.merge(evaluation, on="person_id", how="inner")
-                eval_data.to_csv(f"{self.eval}/{tab}")
+                eval_data.to_csv(f"{self.eval}/{tab}", index=False)
                 eval_data = None
             else:
                 eval_data = None
