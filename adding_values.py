@@ -7,7 +7,7 @@ def replacing_values(x, count, values):
         return x
     else:
         count += 1
-        return values[random.randint(0, 2)]
+        return values[random.randint(0, len(values)-1)]
 
 
 def adding_race_concepts(person_table):
