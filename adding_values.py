@@ -24,10 +24,8 @@ def adding_race_concepts(person_table):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("-t", "--training", required=True, help="Path to the folder containing the full OMOP dataset")
-    parser.add_argument("-e", "--evaluation", default=20, help="Percentage of the evaluation dataset to the full dataset")
+    parser.add_argument("-f", "--person_file", required=True, help="Path to the person.csv file")
     args = parser.parse_args()
 
     
-    adding_race_concepts(args.training)
-    adding_race_concepts(args.evaluation)
+    adding_race_concepts(args.person_file)
