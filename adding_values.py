@@ -17,8 +17,9 @@ def adding_race_concepts(person_table):
     data = pd.read_csv(person_table)
     #print (data[["person_id", "gender_concept_id", "race_concept_id"]])
     data["race_concept_id"] = data["race_concept_id"].apply(lambda x: replacing_values(x, count, values))
+    data = data[["person_id","gender_concept_id","year_of_birth","month_of_birth","day_of_birth","time_of_birth","race_concept_id","ethnicity_concept_id","location_id","provider_id","care_site_id","person_source_value","gender_source_value","gender_source_concept_id","race_source_value","race_source_concept_id","ethnicity_source_value","ethnicity_source_concept_id"]]
     #print (data[["person_id", "gender_concept_id", "race_concept_id"]])
-    data.to_csv(person_table)
+    data.to_csv(person_table, index=False)
     #exit()
 
 
