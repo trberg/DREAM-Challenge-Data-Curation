@@ -12,4 +12,4 @@ WORKDIR /app
 COPY ./Mortality-Prediction.py .
 COPY ./adding_values.py .
 
-CMD ["python", "./Mortality-Prediction.py", "-f", "/data", "-p" "top_10000_synpuf"]
+#CMD ["python", "./Mortality-Prediction.py", "-f", "/data", "-p" "top_10000_synpuf"]
