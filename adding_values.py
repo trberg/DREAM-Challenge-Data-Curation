@@ -11,7 +11,7 @@ def replacing_values(x, count, values):
 
 
 def adding_race_concepts(person_table):
-    values = ["8657","8515","8557"]
+    values = ["8657","8515","8557", "8516", "8527"]
     count = 0
 
     data = pd.read_csv(person_table)
