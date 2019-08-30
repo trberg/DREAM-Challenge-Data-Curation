@@ -1,5 +1,6 @@
 import pandas as pd
 import random
+import argparse
 
 def replacing_values(x, count, values):
     if count > (len(values)*10):
@@ -22,5 +23,11 @@ def adding_race_concepts(person_table):
 
 
 if __name__ == "__main__":
-    adding_race_concepts("/Users/admin/Documents/Research/DREAM Challenge/Challenge Data/synpuf_clean/train/person.csv")
-    adding_race_concepts("/Users/admin/Documents/Research/DREAM Challenge/Challenge Data/synpuf_clean/validation/person.csv")
+    parser = argparse.ArgumentParser()
+    parser.add_argument("-t", "--training", required=True, help="Path to the folder containing the full OMOP dataset")
+    parser.add_argument("-e", "--evaluation", default=20, help="Percentage of the evaluation dataset to the full dataset")
+    args = parser.parse_args()
+
+    
+    adding_race_concepts(args.training)
+    adding_race_concepts(args.evaluation)
